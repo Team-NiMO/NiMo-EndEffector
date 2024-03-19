@@ -1,0 +1,8 @@
+prefix=/home/sruthim/catkin_ws/install
+
+Name: nimo_end_effector
+Description: Description of nimo_end_effector
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -lnimo_end_effector
+Requires: rospy std_msgs

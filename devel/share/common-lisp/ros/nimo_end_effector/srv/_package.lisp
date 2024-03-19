@@ -1,0 +1,20 @@
+(cl:defpackage nimo_end_effector-srv
+  (:use )
+  (:export
+   "ACT_LINEAR"
+   "<ACT_LINEAR-REQUEST>"
+   "ACT_LINEAR-REQUEST"
+   "<ACT_LINEAR-RESPONSE>"
+   "ACT_LINEAR-RESPONSE"
+   "GET_CAL_DAT"
+   "<GET_CAL_DAT-REQUEST>"
+   "GET_CAL_DAT-REQUEST"
+   "<GET_CAL_DAT-RESPONSE>"
+   "GET_CAL_DAT-RESPONSE"
+   "GET_DAT"
+   "<GET_DAT-REQUEST>"
+   "GET_DAT-REQUEST"
+   "<GET_DAT-RESPONSE>"
+   "GET_DAT-RESPONSE"
+  ))
+
