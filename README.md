@@ -1,5 +1,5 @@
-# NiMo-EndEffector
-End Effector package for MRSD '25 Team D: NiMo (Nitrate Monitoring of Cornstalks).
+# NiMo End Effector ROS Package
+End Effector ROS package for MRSD '25 Team D: NiMo (Nitrate Monitoring of Cornstalks).
 
 
 Handles function calls and serial communication between end effector's Adafruit Bluefruit and NiMo's Finite State Machine (FSM).
