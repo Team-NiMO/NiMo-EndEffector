@@ -100,7 +100,7 @@ class NSampleNode:
         * flag: description of how get_cal_dat process went
         """
 
-        status = req.status
+        status = req.id
         # If "clean" status, just return N/A flag
         if status == "clean":
             rospy.loginfo("Clean sensor has been requested.")
