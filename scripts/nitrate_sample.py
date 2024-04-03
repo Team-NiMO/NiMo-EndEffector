@@ -8,6 +8,7 @@ Description: Handles function calls and serial communication between end effecto
 #!/usr/bin/env python3
 
 from nimo_end_effector.srv import *
+from std_msgs.msg import Float64
 import rospy
 
 from serial import *
@@ -30,10 +31,11 @@ class NSampleNode:
         cls.get_dat_service = rospy.Service('get_dat', get_dat, cls.handle_get_dat)
         cls.get_cal_dat_service = rospy.Service('get_cal_dat', get_cal_dat, cls.handle_get_cal_dat)
         cls.act_linear_service = rospy.Service('act_linear', act_linear, cls.handle_act_linear)
+        cls.pub = rospy.Publisher('nit_val', Float64, queue_size=1000)
 
         # Define global variables
-        cls.cal_high = -1 #high calibration reading, in mV
-        cls.cal_low = -1 #low calibration reading, in mV
+        cls.cal_high = 1.4 #high calibration reading, in mV
+        cls.cal_low = 1.7 #low calibration reading, in mV
         cls.conc_high = 2000 #high calibration concentration of sol'n, in ppm
         cls.conc_low = 200 #low calibration concentration of sol'n, in ppm
 
@@ -41,7 +43,15 @@ class NSampleNode:
         cls.serialcomm = Serial('/dev/ttyACM0', 9600)
         cls.serialcomm.timeout = 1
 
+        cls.timer = rospy.timer.Timer(rospy.rostime.Duration(0.1), cls.getNitVal)
+
         rospy.loginfo('Waiting for service calls...')
+
+    @classmethod
+    def getNitVal(cls, idk):
+        cls.nit_val = float(cls.serialcomm.readline())
+        nit_val_ppm = (cls.conc_high-cls.conc_low)/(cls.cal_high-cls.cal_low)*(cls.nit_val-cls.cal_low) + cls.conc_low
+        cls.pub.publish(Float64(nit_val_ppm))
 
     @classmethod
     def sample(cls):
@@ -54,16 +64,15 @@ class NSampleNode:
         time.sleep(5)
         # Read continuously for 10 seconds
         t_end = time.time() + 10
-        n_samples = 0
-        nit_val = 0
         # For ten seconds, collect data and sample values in mV
+        nit_vals = []
+        # For ten seconds, collect data and sample values
         while time.time() < t_end:
-            nit_val += float(cls.serialcomm.readline())
-            n_samples += 1
-        # Average over ten seconds for final calibration value in mV
-        nit_val /= n_samples
-        # Return nitrate sensor values in mV
-        return nit_val
+            nit_vals.append(cls.nit_val)
+            time.sleep(0.1)
+        # Average over ten seconds for final calibration value
+        out_val = sum(nit_vals) / len(nit_vals)
+        return out_val
     
     @classmethod
     def handle_get_dat(cls, req: get_datRequest) -> get_datResponse:
