@@ -50,8 +50,8 @@ class NSampleNode:
     @classmethod
     def getNitVal(cls, idk):
         cls.nit_val = float(cls.serialcomm.readline())
-        nit_val_ppm = (cls.conc_high-cls.conc_low)/(cls.cal_high-cls.cal_low)*(cls.nit_val-cls.cal_low) + cls.conc_low
-        cls.pub.publish(Float64(nit_val_ppm))
+        # nit_val_ppm = (cls.conc_high-cls.conc_low)/(cls.cal_high-cls.cal_low)*(cls.nit_val-cls.cal_low) + cls.conc_low
+        cls.pub.publish(Float64(cls.nit_val))
 
     @classmethod
     def sample(cls):
