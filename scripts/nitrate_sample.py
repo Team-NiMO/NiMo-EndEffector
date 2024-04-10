@@ -38,20 +38,35 @@ class NSampleNode:
         cls.cal_low = 1.7 #low calibration reading, in mV
         cls.conc_high = 2000 #high calibration concentration of sol'n, in ppm
         cls.conc_low = 200 #low calibration concentration of sol'n, in ppm
+        cls.actuator_status = "" #actuator status
+        cls.actuate = "" #actuator extend vs. retract.
 
         # Set up pyserial communication
-        cls.serialcomm = Serial('/dev/ttyACM0', 9600)
-        cls.serialcomm.timeout = 1
-
-        cls.timer = rospy.timer.Timer(rospy.rostime.Duration(0.1), cls.getNitVal)
+        # cls.serialcomm = Serial('/dev/ttyACM1', 9600)
+        # cls.serialcomm.timeout = 1
+        cls.serialcomm = Serial(port='/dev/ttyACM0', \
+                                baudrate=9600,
+                                bytesize=EIGHTBITS,
+                                parity=PARITY_NONE,
+                                stopbits=STOPBITS_ONE,
+                                timeout=0.25)
+        
+        cls.timer = rospy.timer.Timer(rospy.rostime.Duration(0.01), cls.getNitVal)
 
         rospy.loginfo('Waiting for service calls...')
 
     @classmethod
     def getNitVal(cls, idk):
-        cls.nit_val = float(cls.serialcomm.readline())
-        # nit_val_ppm = (cls.conc_high-cls.conc_low)/(cls.cal_high-cls.cal_low)*(cls.nit_val-cls.cal_low) + cls.conc_low
-        cls.pub.publish(Float64(cls.nit_val))
+        text = str(cls.serialcomm.readline().decode().strip('\r\n'))
+        rospy.logwarn(text)
+        try:
+            info = text.split(',')
+            cls.nit_val = info[1]
+            if info[0] == '1':
+                cls.actuator_status = True
+            cls.pub.publish(Float64(cls.nit_val))
+        except:
+            return
 
     @classmethod
     def sample(cls):
@@ -121,7 +136,7 @@ class NSampleNode:
             cls.cal_high = cls.sample()
         # Throw error otherwise
         else:
-            rospy.logerr("Invalid status for calibration has likely been inputted!", "red")
+            rospy.logerr("Invalid status for calibration has likely been inputted!")
             return get_cal_datResponse(flag = "ERROR")
 
         return get_cal_datResponse(flag = "SUCCESS")
@@ -136,15 +151,25 @@ class NSampleNode:
         OUTPUTS (act_linearResponse):
         * flag: description of how act_linear process went
         """
+        if cls.actuate == req.actuate:
+            rospy.logerr("The linear actuator is already at requested position.")
+            return act_linearResponse(flag = "ERROR")
+        else:
+            cls.actuate = req.actuate
 
-        actuate = req.actuate
-        if actuate == "extend":
+        if cls.actuate == "extend":
             cls.serialcomm.write(str(1).encode()) # "1" is associated to full extention (50 mm stroke)
-        elif actuate == "retract":
+        elif cls.actuate == "retract":
             cls.serialcomm.write(str(0).encode()) # "0" is associated to full retraction (0 mm stroke)
         else: # Otherwise throw error
-            rospy.logerr("Invalid request for actuation has likely been inputted!", "red")
+            rospy.logerr("Invalid request for actuation has likely been inputted!")
             return act_linearResponse(flag = "ERROR")
+        
+        while True:
+            if cls.actuator_status == True:
+                cls.actuator_status = False
+                break
+
         return act_linearResponse(flag = "SUCCESS")
 
 
