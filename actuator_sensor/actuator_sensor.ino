@@ -17,7 +17,8 @@ int ctr = 0;
 int pos_vals[10];
 int idx = 0;
 int des_pos = 0;
-bool stall = false;
+bool complete = false;
+bool extend_complete = false;
 
 #define BOOST_EN 12
 #define CHIP_SELECT 10
@@ -79,13 +80,19 @@ void loop() {
       pos_vals[i] = INT_MIN;
     }
     des_pos = ctrl * 1023;
-    stall = false;
+    complete = false;
+    extend_complete = false;
   }
   int pos = analogRead(A2);
 
-  if (stall == true){
+  if (complete == true){
     actuator_status = "Done";
     digitalWrite(A0, HIGH);
+    digitalWrite(A1, LOW); 
+  }
+  else if (extend_complete == true){
+    actuator_status = "Done";
+    digitalWrite(A0, LOW);
     digitalWrite(A1, LOW); 
   }
   else if (pos < des_pos && abs(des_pos - pos) > THRESH) {
@@ -104,7 +111,7 @@ void loop() {
     if(abs(avg - pos) < THRESH){
       actuator_status = "Done";
       des_pos = pos;
-      stall = true;
+      complete = true;
     }
     
   } else if (pos > des_pos && abs(des_pos - pos) > THRESH) {
@@ -123,7 +130,7 @@ void loop() {
     if(abs(avg - pos) < THRESH){
       actuator_status = "Done";
       des_pos = pos;
-      stall = true;
+      complete = true;
     }
     
   } else if (pos <= des_pos && abs(des_pos - pos) <= THRESH){
@@ -140,12 +147,11 @@ void loop() {
   int16_t adc0 = ads.readADC_SingleEnded(0);
   float voltageReading = ads.computeVolts(adc0);
 
-  voltageReading = pos; // TEMPORARY
-
   if (past_action != actuator_status && actuator_status != "") {
     Serial.println(String(1) + "," + String(voltageReading)+","+ctr);
     for(int i = 0; i < 10; i++){
       pos_vals[i] = INT_MIN;
+      extend_complete = true;
     }
     }
   else{

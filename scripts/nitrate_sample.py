@@ -61,7 +61,7 @@ class NSampleNode:
         rospy.logwarn(text)
         try:
             info = text.split(',')
-            cls.nit_val = info[1]
+            cls.nit_val = float(info[1])
             if info[0] == '1':
                 cls.actuator_status = True
             cls.pub.publish(Float64(cls.nit_val))
@@ -104,6 +104,8 @@ class NSampleNode:
         # Call sample function
         nit_val_mV = cls.sample()
         # Linear interpolation for value in ppm (given mV)
+        if cls.cal_high == cls.cal_low:
+            return get_datResponse(nitrate_val = -1, flag = "ERROR")
         nit_val_ppm = (cls.conc_high-cls.conc_low)/(cls.cal_high-cls.cal_low)*(nit_val_mV-cls.cal_low) + cls.conc_low
         # If interpolated value is out of calibration range, throw error flag
         if nit_val_ppm > cls.conc_high or nit_val_ppm < cls.conc_low:

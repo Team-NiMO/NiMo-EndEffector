@@ -1,0 +1,2 @@
+Float64 Time
+Float64 NitrateValue
