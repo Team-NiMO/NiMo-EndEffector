@@ -58,7 +58,7 @@ class NSampleNode:
     @classmethod
     def getNitVal(cls, idk):
         text = str(cls.serialcomm.readline().decode().strip('\r\n'))
-        rospy.logwarn(text)
+        # rospy.logwarn(text)
         try:
             info = text.split(',')
             cls.nit_val = info[1]
@@ -83,9 +83,10 @@ class NSampleNode:
         nit_vals = []
         # For ten seconds, collect data and sample values
         while time.time() < t_end:
-            nit_vals.append(cls.nit_val)
+            nit_vals.append(float(cls.nit_val))
             time.sleep(0.1)
         # Average over ten seconds for final calibration value
+        rospy.logwarn(nit_vals)
         out_val = sum(nit_vals) / len(nit_vals)
         return out_val
     
@@ -158,9 +159,16 @@ class NSampleNode:
             cls.actuate = req.actuate
 
         if cls.actuate == "extend":
-            cls.serialcomm.write(str(1).encode()) # "1" is associated to full extention (50 mm stroke)
+            cls.serialcomm.write(str(3).encode()) # "1" is associated to full extention (50 mm stroke)
         elif cls.actuate == "retract":
-            cls.serialcomm.write(str(0).encode()) # "0" is associated to full retraction (0 mm stroke)
+            cls.serialcomm.write(str(5).encode()) # "0" is associated to full retraction (0 mm stroke)
+
+        # just for testing (need to write elsewhere)
+        elif cls.actuate == "unload":
+            cls.serialcomm.write(str(6).encode()) # "0" is associated to full retraction (0 mm stroke)
+        elif cls.actuate == "load":
+            cls.serialcomm.write(str(1).encode()) # "0" is associated to full retraction (0 mm stroke)
+
         else: # Otherwise throw error
             rospy.logerr("Invalid request for actuation has likely been inputted!")
             return act_linearResponse(flag = "ERROR")
