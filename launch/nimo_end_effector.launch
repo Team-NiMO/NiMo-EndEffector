@@ -1,6 +1,6 @@
 <launch>
 
-<node pkg="rqt_multiplot" name="rqt_multiplot" type="rqt_multiplot" output="screen"/>
+<!-- <node pkg="rqt_multiplot" name="rqt_multiplot" type="rqt_multiplot" output="screen"/> -->
 
 <node pkg="nimo_end_effector" name="nimo_end_effector" type="nitrate_sample.py" output="screen"/>
 
