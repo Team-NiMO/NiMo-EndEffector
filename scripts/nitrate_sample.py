@@ -14,6 +14,10 @@ import rospy
 from serial import *
 import time
 
+PUMP_TIME = 15
+SAMPLE_TIME = 30
+VERBOSE = True
+
 class NSampleNode:
     @classmethod
     def __init__(cls):
@@ -44,7 +48,7 @@ class NSampleNode:
         # Set up pyserial communication
         # cls.serialcomm = Serial('/dev/ttyACM1', 9600)
         # cls.serialcomm.timeout = 1
-        cls.serialcomm = Serial(port='/dev/ttyACM2', \
+        cls.serialcomm = Serial(port='/dev/ttyACM1', \
                                 baudrate=9600,
                                 bytesize=EIGHTBITS,
                                 parity=PARITY_NONE,
@@ -77,8 +81,8 @@ class NSampleNode:
 
         # Delay reading for 5 seconds
         time.sleep(5)
-        # Read continuously for 10 seconds
-        t_end = time.time() + 10
+        # Read continuously for SAMPLE_TIME seconds
+        t_end = time.time() + PUMP_TIME + SAMPLE_TIME
         # For ten seconds, collect data and sample values in mV
         nit_vals = []
         # For ten seconds, collect data and sample values
@@ -86,7 +90,7 @@ class NSampleNode:
             nit_vals.append(float(cls.nit_val))
             time.sleep(0.1)
         # Average over ten seconds for final calibration value
-        rospy.logwarn(nit_vals)
+        # rospy.logwarn(nit_vals)
         out_val = sum(nit_vals) / len(nit_vals)
         return out_val
     
@@ -113,6 +117,8 @@ class NSampleNode:
             return get_datResponse(nitrate_val = -1, flag = "Nitrate value out of range.")
         # Otherwise return nitrate value in ppm
         else:
+            if VERBOSE: rospy.loginfo("Nitrate Value = %.2f V" % nit_val_mV)
+            if VERBOSE: rospy.loginfo("Nitrate Value = %.2f ppm" % nit_val_ppm)
             return get_datResponse(nitrate_val = nit_val_ppm, flag = "SUCCESS")
         
     @classmethod
@@ -135,8 +141,10 @@ class NSampleNode:
         # If "cal_low" or "cal_high", call sample function and store appropriately
         elif status == "cal_low":
             cls.cal_low = cls.sample()
+            if VERBOSE: rospy.loginfo("Low Calibration Value = %.2f V" % cls.cal_low)
         elif status == "cal_high":
             cls.cal_high = cls.sample()
+            rospy.loginfo("High Calibration Value = %.2f V" % cls.cal_high)
         # Throw error otherwise
         else:
             rospy.logerr("Invalid status for calibration has likely been inputted!")
