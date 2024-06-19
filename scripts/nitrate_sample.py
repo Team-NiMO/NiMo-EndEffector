@@ -162,6 +162,8 @@ class NSampleNode:
         OUTPUTS (act_linearResponse):
         * flag: description of how act_linear process went
         """
+        cls.actuator_status = False
+
         if cls.actuate == req.actuate:
             rospy.logerr("The linear actuator is already at requested position.")
             return act_linearResponse(flag = "ERROR")
@@ -189,8 +191,6 @@ class NSampleNode:
                 break
 
         return act_linearResponse(flag = "SUCCESS")
-
-
 
 if __name__ == '__main__':
     # Define nimo_end_effector node and process service calls.
