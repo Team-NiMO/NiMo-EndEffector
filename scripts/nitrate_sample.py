@@ -44,7 +44,7 @@ class NSampleNode:
         # Set up pyserial communication
         # cls.serialcomm = Serial('/dev/ttyACM1', 9600)
         # cls.serialcomm.timeout = 1
-        cls.serialcomm = Serial(port='/dev/ttyACM1', \
+        cls.serialcomm = Serial(port='/dev/ttyACM2', \
                                 baudrate=9600,
                                 bytesize=EIGHTBITS,
                                 parity=PARITY_NONE,
