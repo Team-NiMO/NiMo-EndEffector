@@ -90,7 +90,7 @@ class NSampleNode:
             nit_vals.append(float(cls.nit_val))
             time.sleep(0.1)
         # Average over ten seconds for final calibration value
-        # rospy.logwarn(nit_vals)
+        rospy.logwarn(nit_vals)
         out_val = sum(nit_vals) / len(nit_vals)
         return out_val
     
