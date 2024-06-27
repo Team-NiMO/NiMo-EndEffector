@@ -14,6 +14,9 @@ import rospy
 from serial import *
 import time
 
+PUMP_TIME = 15
+READ_TIME = 15
+
 class NSampleNode:
     @classmethod
     def __init__(cls):
@@ -78,7 +81,7 @@ class NSampleNode:
         # Delay reading for 5 seconds
         time.sleep(5)
         # Read continuously for 10 seconds
-        t_end = time.time() + 10
+        t_end = time.time() + PUMP_TIME + READ_TIME
         # For ten seconds, collect data and sample values in mV
         nit_vals = []
         # For ten seconds, collect data and sample values
