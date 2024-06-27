@@ -14,8 +14,8 @@ import rospy
 from serial import *
 import time
 
-PUMP_TIME = 15
-SAMPLE_TIME = 30
+PUMP_TIME = 0
+SAMPLE_TIME = 5
 VERBOSE = True
 
 class NSampleNode:
@@ -110,14 +110,18 @@ class NSampleNode:
         nit_val_mV = cls.sample()
         # Linear interpolation for value in ppm (given mV)
         if cls.cal_high == cls.cal_low:
+            rospy.loginfo("High concentration value same as low concentration")
             return get_datResponse(nitrate_val = -1, flag = "ERROR")
         nit_val_ppm = (cls.conc_high-cls.conc_low)/(cls.cal_high-cls.cal_low)*(nit_val_mV-cls.cal_low) + cls.conc_low
+        rospy.loginfo("Nitrate Value = %.2f mV" % nit_val_mV)
+        rospy.loginfo("Nitrate Value = %.2f ppm" % nit_val_ppm)
         # If interpolated value is out of calibration range, throw error flag
         if nit_val_ppm > cls.conc_high or nit_val_ppm < cls.conc_low:
+            rospy.loginfo("Nitrate value out of range.")
             return get_datResponse(nitrate_val = -1, flag = "Nitrate value out of range.")
         # Otherwise return nitrate value in ppm
         else:
-            if VERBOSE: rospy.loginfo("Nitrate Value = %.2f V" % nit_val_mV)
+            if VERBOSE: rospy.loginfo("Nitrate Value = %.2f mV" % nit_val_mV)
             if VERBOSE: rospy.loginfo("Nitrate Value = %.2f ppm" % nit_val_ppm)
             return get_datResponse(nitrate_val = nit_val_ppm, flag = "SUCCESS")
         
