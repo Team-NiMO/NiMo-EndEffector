@@ -40,6 +40,7 @@ class NSampleNode:
         # Define global variables
         cls.cal_high = 1.4 #high calibration reading, in mV
         cls.cal_low = 1.7 #low calibration reading, in mV
+        cls.water = 1.0
         cls.conc_high = 2000 #high calibration concentration of sol'n, in ppm
         cls.conc_low = 200 #low calibration concentration of sol'n, in ppm
         cls.actuator_status = "" #actuator status
@@ -48,7 +49,7 @@ class NSampleNode:
         # Set up pyserial communication
         # cls.serialcomm = Serial('/dev/ttyACM1', 9600)
         # cls.serialcomm.timeout = 1
-        cls.serialcomm = Serial(port='/dev/ttyACM1', \
+        cls.serialcomm = Serial(port='/dev/ttyACM0', \
                                 baudrate=9600,
                                 bytesize=EIGHTBITS,
                                 parity=PARITY_NONE,
@@ -141,6 +142,8 @@ class NSampleNode:
         # If "clean" status, just return N/A flag
         if status == "clean":
             rospy.loginfo("Clean sensor has been requested.")
+            # cls.water = cls.sample()
+            # if VERBOSE: rospy.loginfo("Water Calibration Value = %.2f V" % cls.water)
             return get_cal_datResponse(flag = "N/A")
         # If "cal_low" or "cal_high", call sample function and store appropriately
         elif status == "cal_low":
