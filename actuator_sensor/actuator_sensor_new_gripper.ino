@@ -118,7 +118,7 @@ void loop() {
         break;
 
       case '6': // unload the sensor 
-        servo_pos = 42;
+        servo_pos = 41;
         des_pos = 1020;
         myservo.write(servo_pos);
         break;
